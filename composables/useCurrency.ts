@@ -1,6 +1,6 @@
 import { computed } from "vue";
 
-export function useCurrency(currency: string = "USD") {
+export function useCurrency(currency: string = "ILS") {
   const formatter = computed(() => {
     return new Intl.NumberFormat(undefined, {
       style: "currency",

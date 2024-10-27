@@ -12,29 +12,40 @@
     <Trend
       :amount="5000"
       :last-amount="3000"
-      :loading="false"
+      :loading="isLoading"
       title="Expense"
     />
     <Trend
       :amount="2000"
       :last-amount="3000"
-      :loading="false"
+      :loading="isLoading"
       title="Investments"
     />
     <Trend
       :amount="4000"
       :last-amount="3000"
-      :loading="false"
+      :loading="isLoading"
       title="Savings"
     />
   </section>
 
-  <section>
-    <Transaction
-      v-for="transaction in transactions"
-      :key="transaction.id"
-      :transaction="transaction"
-    />
+  <section v-if="!isLoading">
+    <div
+      v-for="(transactions, date) in transactionsGroupedByDate"
+      :key="date"
+      class="mb-10"
+    >
+      <DailyTransactionSummary :transactions="transactions" :date="date" />
+      <Transaction
+        v-for="transaction in transactions"
+        :key="transaction.id"
+        :transaction="transaction"
+        @deleted="refreshTransactions"
+      />
+    </div>
+  </section>
+  <section v-else>
+    <USkeleton class="h-8 w-full mb-2" v-for="i in 4" :key="i" />
   </section>
 </template>
 
@@ -45,14 +56,38 @@ const selectedView = ref(transactionViewOptions[1]);
 const transactions = ref<ITransaction[]>([]);
 
 const supabase = useSupabaseClient<ITransaction[]>();
+const isLoading = ref(false);
 
-const { data, status } = useAsyncData("transactions", async () => {
-  const { data, error } = await supabase.from("transactions").select("*");
-  if (error) {
-    return [];
+async function fetchTransactions(): Promise<ITransaction[]> {
+  isLoading.value = true;
+  try {
+    const { data } = await useAsyncData("transactions", async () => {
+      const { data, error } = await supabase.from("transactions").select("*");
+      if (error) {
+        return [];
+      }
+      return data;
+    });
+    return data.value as ITransaction[];
+  } finally {
+    isLoading.value = false;
   }
-  return data;
+}
+
+const transactionsGroupedByDate = computed(() => {
+  let grouped: Record<string, ITransaction[]> = {};
+  for (const transaction of transactions.value) {
+    const date = new Date(transaction.created_at).toISOString().split("T")[0];
+    if (!grouped[date]) {
+      grouped[date] = [];
+    }
+    grouped[date].push(transaction);
+  }
+  return grouped;
 });
-console.log(status.value);
-transactions.value = data.value || [];
+
+async function refreshTransactions() {
+  transactions.value = await fetchTransactions();
+}
+refreshTransactions();
 </script>
