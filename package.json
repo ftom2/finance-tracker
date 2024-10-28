@@ -14,7 +14,8 @@
     "@nuxtjs/supabase": "^1.4.1",
     "nuxt": "^3.13.2",
     "vue": "latest",
-    "vue-router": "latest"
+    "vue-router": "latest",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@vue-macros/nuxt": "^1.12.5"
