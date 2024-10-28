@@ -9,26 +9,26 @@
     class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 sm:gap-16 mb-10"
   >
     <Trend
-      :amount="incomeTotal"
-      :last-amount="400"
+      :amount="amounts?.incomeThisYear"
+      :last-amount="amounts?.incomeLastYear"
       :loading="false"
       title="Income"
     />
     <Trend
-      :amount="expenseTotal"
-      :last-amount="500"
+      :amount="amounts?.expenseThisYear"
+      :last-amount="amounts?.expenseLastYear"
       :loading="isLoading"
       title="Expense"
     />
     <Trend
-      :amount="2000"
-      :last-amount="3000"
+      :amount="amounts?.investmentsThisYear"
+      :last-amount="amounts?.investmentsLastYear"
       :loading="isLoading"
       title="Investments"
     />
     <Trend
-      :amount="4000"
-      :last-amount="3000"
+      :amount="amounts?.savingsThisYear"
+      :last-amount="amounts?.savingsLastYear"
       :loading="isLoading"
       title="Savings"
     />
@@ -43,7 +43,10 @@
       </p>
     </div>
     <div>
-      <NewTransactionModal v-model="isNewTransactionModalOpen" />
+      <NewTransactionModal
+        v-model="isNewTransactionModalOpen"
+        @saved="refreshTransactions"
+      />
       <UButton
         icon="i-heroicons-plus-circle"
         color="white"
@@ -77,8 +80,9 @@
 </template>
 
 <script setup lang="ts">
-import { transactionViewOptions } from "~/constants";
+import { TransactionType, transactionViewOptions } from "~/constants";
 import type { ITransaction } from "~/utils/types";
+const amounts = ref();
 const selectedView = ref(transactionViewOptions[1]);
 const transactions = ref<ITransaction[]>([]);
 const isNewTransactionModalOpen = ref(false);
@@ -98,17 +102,6 @@ const expense = computed(() => {
   );
 });
 
-const incomeTotal = computed(() => {
-  return income.value.reduce((acc, transaction) => acc + transaction.amount, 0);
-});
-
-const expenseTotal = computed(() => {
-  return expense.value.reduce(
-    (acc, transaction) => acc + transaction.amount,
-    0
-  );
-});
-
 const incomeCount = computed(() => {
   return income.value.length;
 });
@@ -121,7 +114,10 @@ async function fetchTransactions(): Promise<ITransaction[]> {
   isLoading.value = true;
   try {
     const { data } = await useAsyncData("transactions", async () => {
-      const { data, error } = await supabase.from("transactions").select("*");
+      const { data, error } = await supabase
+        .from("transactions")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (error) {
         return [];
       }
@@ -132,7 +128,6 @@ async function fetchTransactions(): Promise<ITransaction[]> {
     isLoading.value = false;
   }
 }
-
 const transactionsGroupedByDate = computed(() => {
   let grouped: Record<string, ITransaction[]> = {};
   for (const transaction of transactions.value) {
@@ -142,11 +137,70 @@ const transactionsGroupedByDate = computed(() => {
     }
     grouped[date].push(transaction);
   }
+
   return grouped;
 });
 
+/**
+ * get the amounts for each transaction type
+ * based on this year and last year
+ */
+function getAmounts(transactionsGroupedByDate: Record<string, ITransaction[]>) {
+  let incomeThisYear = 0;
+  let incomeLastYear = 0;
+  let expenseThisYear = 0;
+  let expenseLastYear = 0;
+  let savingsThisYear = 0;
+  let savingsLastYear = 0;
+  let investmentsThisYear = 0;
+  let investmentsLastYear = 0;
+  const currentYear = new Date().getFullYear();
+  const lastYear = currentYear - 1;
+  for (const date in transactionsGroupedByDate) {
+    const year = new Date(date).getFullYear();
+    for (const transaction of transactionsGroupedByDate[date]) {
+      if (transaction.type === TransactionType.Income) {
+        if (year === currentYear) {
+          incomeThisYear += transaction.amount;
+        } else if (year === lastYear) {
+          incomeLastYear += transaction.amount;
+        }
+      } else if (transaction.type === TransactionType.Expense) {
+        if (year === currentYear) {
+          expenseThisYear += transaction.amount;
+        } else if (year === lastYear) {
+          expenseLastYear += transaction.amount;
+        }
+      } else if (transaction.type === TransactionType.Savings) {
+        if (year === currentYear) {
+          savingsThisYear += transaction.amount;
+        } else if (year === lastYear) {
+          savingsLastYear += transaction.amount;
+        }
+      } else if (transaction.type === TransactionType.Investment) {
+        if (year === currentYear) {
+          investmentsThisYear += transaction.amount;
+        } else if (year === lastYear) {
+          investmentsLastYear += transaction.amount;
+        }
+      }
+    }
+  }
+  return {
+    incomeThisYear,
+    incomeLastYear,
+    expenseThisYear,
+    expenseLastYear,
+    savingsThisYear,
+    savingsLastYear,
+    investmentsThisYear,
+    investmentsLastYear,
+  };
+}
+
 async function refreshTransactions() {
   transactions.value = await fetchTransactions();
+  amounts.value = getAmounts(transactionsGroupedByDate.value);
 }
 refreshTransactions();
 </script>

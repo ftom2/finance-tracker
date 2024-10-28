@@ -1,11 +1,14 @@
 <template>
   <div
-    class="grid grid-cols-2 py-4 border-b border-gray-200 text-gray-900 dark:border-gray-800 dark:text-gray-100"
+    class="grid grid-cols-3 py-4 border-b border-gray-200 text-gray-900 dark:border-gray-800 dark:text-gray-100"
   >
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-4 col-span-2">
       <div class="flex items-center gap-2">
         <UIcon :name="icon" :class="color" />
-        <div>{{ transaction.description }}</div>
+        <div class="flex flex-col gap-2 items-start">
+          <UBadge variant="soft">{{ transaction.type }}</UBadge>
+          <p>{{ transaction.description }}</p>
+        </div>
       </div>
       <div v-if="transaction.category">
         <UBadge color="white">{{ transaction.category }}</UBadge>
@@ -30,7 +33,7 @@
 <script setup lang="ts">
 import type { ITransaction } from "~/utils/types";
 
-const toast = useToast();
+const { showSuccess, showError } = useToastMessages();
 const supabase = useSupabaseClient();
 
 const { transaction } = defineProps<{ transaction: ITransaction }>();
@@ -65,21 +68,11 @@ async function deleteTransaction() {
         .eq("id", transaction.id);
     });
     if (error.value) throw error.value;
-    toast.add({
-      title: "Transaction deleted",
-      timeout: 2000,
-      icon: "i-heroicons-check-circle",
-      color: "green",
-    });
 
+    showSuccess("Transaction deleted");
     emit("deleted");
   } catch (error) {
-    toast.add({
-      title: "Error deleting transaction",
-      timeout: 2000,
-      icon: "i-heroicons-exclamation-circle",
-      color: "red",
-    });
+    showError("Error deleting transaction");
     console.error("Error deleting transaction:", error);
   } finally {
     isLoading.value = false;

@@ -12,7 +12,7 @@
       <div v-else class="flex gap-1 items-center text-sm">
         <UIcon :name="icon" class="size-6" :class="color" />
         <div class="text-gray-500 dark:text-gray-400">
-          {{ percentage }} vs last period
+          {{ percentage }} vs last year
         </div>
       </div>
     </div>

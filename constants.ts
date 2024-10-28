@@ -8,6 +8,17 @@ export const CATEGORIES = [
   "Education",
   "Utilities",
   "Others",
-];
+] as const;
 
-export const TRANSACTION_TYPES = ["Income", "Expense", "Savings", "Investment"];
+export enum TransactionType {
+  Income = "Income",
+  Expense = "Expense",
+  Savings = "Savings",
+  Investment = "Investment",
+}
+export const TRANSACTION_TYPES: TransactionType[] = [
+  TransactionType.Income,
+  TransactionType.Expense,
+  TransactionType.Savings,
+  TransactionType.Investment,
+];
