@@ -101,7 +101,12 @@ async function submit() {
   const data = { ...state.value };
   try {
     // @ts-ignore
-    await supabase.from("transactions").insert([data]);
+    const { error } = await supabase.from("transactions").insert([data]);
+
+    if (error) {
+      throw new Error();
+    }
+
     showSuccess("Transaction added successfully");
     emit("saved");
     isOpen.value = false;

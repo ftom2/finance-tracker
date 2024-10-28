@@ -61,14 +61,14 @@ const emit = defineEmits(["deleted"]);
 async function deleteTransaction() {
   try {
     isLoading.value = true;
-    const { error } = await useAsyncData("deleteTransaction", async () => {
-      return await supabase
-        .from("transactions")
-        .delete()
-        .eq("id", transaction.id);
-    });
-    if (error.value) throw error.value;
+    const { error } = await supabase
+      .from("transactions")
+      .delete()
+      .eq("id", transaction.id);
 
+    if (error) {
+      throw new Error();
+    }
     showSuccess("Transaction deleted");
     emit("deleted");
   } catch (error) {
