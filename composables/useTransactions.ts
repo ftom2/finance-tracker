@@ -1,7 +1,12 @@
 import { TransactionType } from "~/constants";
 import type { ITransaction } from "~/utils/types";
 
-export function useTransactions() {
+export function useTransactions(
+  period: ComputedRef<{
+    from: Date;
+    to: Date;
+  }>
+) {
   const supabase = useSupabaseClient<ITransaction>();
   const isLoading = ref(false);
   const transactions = ref<ITransaction[]>([]);
@@ -9,14 +14,19 @@ export function useTransactions() {
   async function fetchTransactions() {
     isLoading.value = true;
     try {
-      const { data, error } = await supabase
-        .from("transactions")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const key = `transactions-${period.value.from.toDateString()}- ${period.value.to.toDateString()}`;
+      const { data, error } = await useAsyncData(key, async () => {
+        const { data, error } = await supabase
+          .from("transactions")
+          .select("*")
+          .gte("created_at", period.value.from.toISOString())
+          .lte("created_at", period.value.to.toISOString())
+          .order("created_at", { ascending: false });
+        if (error) return [];
+        return data;
+      });
 
-      if (error) throw error;
-
-      transactions.value = data || [];
+      transactions.value = (data.value as unknown as ITransaction[]) || [];
     } catch (error) {
       console.error("Error fetching transactions:", error);
       transactions.value = [];
@@ -37,89 +47,76 @@ export function useTransactions() {
     return grouped;
   });
 
-  const amounts = computed(() => {
-    let incomeThisYear = 0;
-    let incomeLastYear = 0;
-    let expenseThisYear = 0;
-    let expenseLastYear = 0;
-    let savingsThisYear = 0;
-    let savingsLastYear = 0;
-    let investmentsThisYear = 0;
-    let investmentsLastYear = 0;
-
-    const currentYear = new Date().getFullYear();
-    const lastYear = currentYear - 1;
-
-    for (const date in transactionsGroupedByDate.value) {
-      const year = new Date(date).getFullYear();
-      for (const transaction of transactionsGroupedByDate.value[date]) {
-        if (transaction.type === TransactionType.Income) {
-          if (year === currentYear) {
-            incomeThisYear += transaction.amount;
-          } else if (year === lastYear) {
-            incomeLastYear += transaction.amount;
-          }
-        } else if (transaction.type === TransactionType.Expense) {
-          if (year === currentYear) {
-            expenseThisYear += transaction.amount;
-          } else if (year === lastYear) {
-            expenseLastYear += transaction.amount;
-          }
-        } else if (transaction.type === TransactionType.Savings) {
-          if (year === currentYear) {
-            savingsThisYear += transaction.amount;
-          } else if (year === lastYear) {
-            savingsLastYear += transaction.amount;
-          }
-        } else if (transaction.type === TransactionType.Investment) {
-          if (year === currentYear) {
-            investmentsThisYear += transaction.amount;
-          } else if (year === lastYear) {
-            investmentsLastYear += transaction.amount;
-          }
-        }
-      }
-    }
-
-    return {
-      incomeThisYear,
-      incomeLastYear,
-      expenseThisYear,
-      expenseLastYear,
-      savingsThisYear,
-      savingsLastYear,
-      investmentsThisYear,
-      investmentsLastYear,
-    };
-  });
-
   async function refresh() {
     await fetchTransactions();
   }
 
+  watch(period, async () => await refresh());
   const income = computed(() => {
     return transactions.value.filter(
-      (transaction) => transaction.type === "Income"
+      (transaction) => transaction.type === TransactionType.Income
     );
   });
 
   const expense = computed(() => {
     return transactions.value.filter(
-      (transaction) => transaction.type === "Expense"
+      (transaction) => transaction.type === TransactionType.Expense
+    );
+  });
+
+  const savings = computed(() => {
+    return transactions.value.filter(
+      (transaction) => transaction.type === TransactionType.Savings
+    );
+  });
+
+  const investments = computed(() => {
+    return transactions.value.filter(
+      (transaction) => transaction.type === TransactionType.Investment
     );
   });
 
   const incomeCount = computed(() => income.value.length);
   const expenseCount = computed(() => expense.value.length);
 
+  const incomeTotal = computed(() => {
+    return income.value.reduce(
+      (acc, transaction) => acc + transaction.amount,
+      0
+    );
+  });
+
+  const expenseTotal = computed(() => {
+    return expense.value.reduce(
+      (acc, transaction) => acc + transaction.amount,
+      0
+    );
+  });
+
+  const savingsTotal = computed(() => {
+    return savings.value.reduce(
+      (acc, transaction) => acc + transaction.amount,
+      0
+    );
+  });
+
+  const investmentsTotal = computed(() => {
+    return investments.value.reduce(
+      (acc, transaction) => acc + transaction.amount,
+      0
+    );
+  });
   return {
     transactions,
     isLoading,
-    fetchTransactions,
     transactionsGroupedByDate,
-    amounts,
-    refresh,
     incomeCount,
     expenseCount,
+    incomeTotal,
+    expenseTotal,
+    savingsTotal,
+    investmentsTotal,
+    fetchTransactions,
+    refresh,
   };
 }

@@ -2,7 +2,12 @@
   <section class="flex items-center justify-between mb-10">
     <h1 class="text-4xl font-extrabold">Summary</h1>
     <div>
-      <USelectMenu :options="transactionViewOptions" v-model="selectedView" />
+      <ClientOnly>
+        <USelectMenu
+          :options="transactionViewOptions as any"
+          v-model="selectedView"
+        />
+      </ClientOnly>
     </div>
   </section>
   <section
@@ -64,50 +69,58 @@
 </template>
 
 <script setup lang="ts">
-import { useTransactions } from "~/composables/useTransactions";
-import { transactionViewOptions } from "~/constants";
+import { transactionViewOptions, type TimePeriod } from "~/constants";
 
+const selectedView = ref<TimePeriod>(transactionViewOptions[1]);
+const isNewTransactionModalOpen = ref(false);
+const { current, previous } = useSelectedTimePeriod(selectedView);
 const {
   isLoading,
   transactionsGroupedByDate,
-  amounts,
+  incomeTotal,
+  expenseTotal,
   incomeCount,
   expenseCount,
+  savingsTotal,
+  investmentsTotal,
   refresh,
-} = useTransactions();
-
-const selectedView = ref(transactionViewOptions[1]);
-const isNewTransactionModalOpen = ref(false);
+} = useTransactions(current);
+const {
+  incomeTotal: prevIncomeTotal,
+  expenseTotal: prevExpenseTotal,
+  savingsTotal: prevSavingsTotal,
+  investmentsTotal: prevInvestmentsTotal,
+  refresh: refreshPrevious,
+} = useTransactions(previous);
 
 const trends = computed(() => {
   return [
     {
       title: "Income",
-      amount: amounts.value?.incomeThisYear,
-      lastAmount: amounts.value?.incomeLastYear,
+      amount: incomeTotal.value,
+      lastAmount: prevIncomeTotal.value,
       loading: false,
     },
     {
       title: "Expense",
-      amount: amounts.value?.expenseThisYear,
-      lastAmount: amounts.value?.expenseLastYear,
+      amount: expenseTotal.value,
+      lastAmount: prevExpenseTotal.value,
       loading: isLoading.value,
     },
     {
       title: "Investments",
-      amount: amounts.value?.investmentsThisYear,
-      lastAmount: amounts.value?.investmentsLastYear,
+      amount: investmentsTotal.value,
+      lastAmount: prevInvestmentsTotal.value,
       loading: isLoading.value,
     },
     {
       title: "Savings",
-      amount: amounts.value?.savingsThisYear,
-      lastAmount: amounts.value?.savingsLastYear,
+      amount: savingsTotal.value,
+      lastAmount: prevSavingsTotal.value,
       loading: isLoading.value,
     },
   ];
 });
 
-// Initial fetch
-await refresh();
+await Promise.all([refresh(), refreshPrevious()]);
 </script>

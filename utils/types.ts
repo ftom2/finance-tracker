@@ -1,3 +1,5 @@
+import type { TransactionType } from "~/constants";
+
 export interface ITransaction {
   id: number;
   amount: number;
@@ -6,5 +8,3 @@ export interface ITransaction {
   created_at: string;
   type: TransactionType;
 }
-
-export type TransactionType = "Income" | "Expense";

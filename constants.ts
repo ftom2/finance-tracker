@@ -1,4 +1,6 @@
-export const transactionViewOptions = ["Yearly", "Monthly", "Daily"];
+export const transactionViewOptions = ["Yearly", "Monthly", "Daily"] as const;
+
+export type TimePeriod = (typeof transactionViewOptions)[number];
 
 export const CATEGORIES = [
   "Food",
