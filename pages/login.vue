@@ -51,19 +51,21 @@ const isLoading = ref(false);
 const supabase = useSupabaseClient();
 const { showError } = useToastMessages();
 
+useLogIn();
+
 async function onSignIn() {
   isLoading.value = true;
   try {
     const { data, error } = await supabase.auth.signInWithOtp({
       email: email.value,
       options: {
-        emailRedirectTo: "http://localhost:3000",
+        emailRedirectTo: "http://localhost:3000/confirm",
       },
     });
     if (error) {
       throw new Error(error.message);
     }
-    console.log({ data });
+
     success.value = true;
   } catch (error) {
     showError((error as Error).message);

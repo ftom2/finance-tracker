@@ -1,7 +1,7 @@
 <template>
   <div class="container mx-auto max-w-4xl px-10">
     <main class="my-10">
-      <AppHeader />
+      <AppHeader v-if="user" />
       <slot />
     </main>
   </div>
@@ -20,6 +20,8 @@ useHead({
     },
   ],
 });
+
+const user = useSupabaseUser();
 </script>
 
 <style>

@@ -2,24 +2,7 @@
   <header class="flex justify-between items-center my-10">
     <NuxtLink to="/" class="text-xl font-bold">Finance Tracker</NuxtLink>
     <div>
-      <UAvatar
-        src="https://avatars.githubusercontent.com/u/739984?v=4"
-        alt="Avatar"
-      />
+      <UserDropdown />
     </div>
   </header>
 </template>
-
-<script setup lang="ts">
-const user = useSupabaseUser();
-
-watch(
-  user,
-  (newUser) => {
-    if (newUser) {
-      console.log("User is logged in", user.value);
-    }
-  },
-  { immediate: true }
-);
-</script>
