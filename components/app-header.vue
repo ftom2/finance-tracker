@@ -10,6 +10,16 @@
   </header>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const user = useSupabaseUser();
 
-<style scoped></style>
+watch(
+  user,
+  (newUser) => {
+    if (newUser) {
+      console.log("User is logged in", user.value);
+    }
+  },
+  { immediate: true }
+);
+</script>

@@ -4,7 +4,7 @@
       <h2 class="text-lg font-semibold">Sign-in to Finance Tracker</h2>
     </template>
 
-    <form>
+    <form @submit.prevent="onSignIn">
       <UFormGroup
         label="Email"
         name="email"
@@ -20,16 +20,12 @@
         />
       </UFormGroup>
 
-      <UButton
-        type="submit"
-        variant="solid"
-        color="black"
-        @click.prevent="onSignIn"
-      >
+      <UButton type="submit" variant="solid" color="black" :loading="isLoading">
         Sign in
       </UButton>
     </form>
   </UCard>
+
   <UCard v-else>
     <template #header>
       <h2 class="text-lg font-semibold text-center">Check your email</h2>
@@ -51,8 +47,28 @@
 <script setup lang="ts">
 const email = ref("");
 const success = ref(false);
+const isLoading = ref(false);
+const supabase = useSupabaseClient();
+const { showError } = useToastMessages();
 
-function onSignIn() {
-  success.value = true;
+async function onSignIn() {
+  isLoading.value = true;
+  try {
+    const { data, error } = await supabase.auth.signInWithOtp({
+      email: email.value,
+      options: {
+        emailRedirectTo: "http://localhost:3000",
+      },
+    });
+    if (error) {
+      throw new Error(error.message);
+    }
+    console.log({ data });
+    success.value = true;
+  } catch (error) {
+    showError((error as Error).message);
+  } finally {
+    isLoading.value = false;
+  }
 }
 </script>
