@@ -69,10 +69,14 @@ async function deleteTransaction() {
     if (error) {
       throw new Error();
     }
-    showSuccess("Transaction deleted");
+    showSuccess({
+      description: "Transaction deleted",
+    });
     emit("deleted");
   } catch (error) {
-    showError("Error deleting transaction");
+    showError({
+      description: "Error deleting transaction",
+    });
     console.error("Error deleting transaction:", error);
   } finally {
     isLoading.value = false;

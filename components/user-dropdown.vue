@@ -2,10 +2,10 @@
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
 
-const items = [
+const items = computed(() => [
   [
     {
-      label: user.value?.email || "Sign in",
+      label: user.value?.email || "",
       slot: "account",
       disabled: true,
     },
@@ -31,7 +31,7 @@ const items = [
       },
     },
   ],
-];
+]);
 </script>
 
 <template>
@@ -44,7 +44,7 @@ const items = [
 
     <template #account="{ item }">
       <div class="text-left">
-        <p>Signed in as</p>
+        <p class="mb-0.5">Signed in as</p>
         <p class="truncate font-medium text-gray-900 dark:text-white">
           {{ item.label }}
         </p>
