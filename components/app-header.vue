@@ -1,13 +1,18 @@
 <template>
-  <header class="flex justify-between items-center my-10">
+  <header
+    class="flex justify-between items-center my-10 border-b dark:border-gray-800 pb-3"
+  >
     <NuxtLink to="/" class="text-xl font-bold">Finance Tracker</NuxtLink>
-    <div>
+    <div class="flex items-center gap-4">
       <UserDropdown :items />
+      <ThemeSwitch />
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
+import ThemeSwitch from "./theme-switch.vue";
+
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
 

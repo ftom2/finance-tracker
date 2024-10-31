@@ -1,6 +1,6 @@
 <template>
   <div
-    class="grid grid-cols-2 py-4 border-b border-gray-200 text-gray-500 dark:border-gray-800 dark:text-gray-400 font-semibold pr-10 bg-gray-800 px-4 -mx-4"
+    class="grid grid-cols-2 py-4 border-b border-gray-200 text-gray-600 dark:border-gray-800 dark:text-gray-400 font-semibold pr-10 bg-gray-200 dark:bg-gray-800 px-4 -mx-4"
   >
     <div class="flex items-center justify-between">{{ date }}</div>
     <div class="flex items-center justify-end">{{ format(sum) }}</div>
