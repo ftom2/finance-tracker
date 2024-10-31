@@ -8,8 +8,9 @@ interface UserDropdownProps {
     click?: () => void;
   }[][];
 }
-
 defineProps<UserDropdownProps>();
+
+const { user, avatarLink } = useUser();
 </script>
 
 <template>
@@ -18,7 +19,7 @@ defineProps<UserDropdownProps>();
     :ui="{ item: { disabled: 'cursor-text select-text' } }"
     :popper="{ placement: 'bottom-start' }"
   >
-    <UAvatar src="https://avatars.githubusercontent.com/u/739984?v=4" />
+    <UAvatar :src="avatarLink" />
 
     <template #account="{ item }">
       <div class="text-left">

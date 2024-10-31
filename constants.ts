@@ -24,3 +24,6 @@ export const TRANSACTION_TYPES: TransactionType[] = [
   TransactionType.Savings,
   TransactionType.Investment,
 ];
+
+export const DEFAULT_AVATAR =
+  "https://avatars.githubusercontent.com/u/739984?v=4";
