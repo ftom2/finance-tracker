@@ -4,4 +4,9 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ["@nuxt/ui", "@vue-macros/nuxt", "@nuxtjs/supabase"],
   supabase: {},
+  runtimeConfig: {
+    public: {
+      baseUrl: process.env.BASE_URL || "http://localhost:3000",
+    },
+  },
 });

@@ -50,16 +50,16 @@ const success = ref(false);
 const isLoading = ref(false);
 const supabase = useSupabaseClient();
 const { showError } = useToastMessages();
-
+const redirectUrl = useRuntimeConfig().public.baseUrl;
 useLogIn();
 
 async function onSignIn() {
   isLoading.value = true;
   try {
-    const { data, error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithOtp({
       email: email.value,
       options: {
-        emailRedirectTo: "http://localhost:3000/confirm",
+        emailRedirectTo: `${redirectUrl}/confirm`,
       },
     });
     if (error) {
@@ -68,7 +68,7 @@ async function onSignIn() {
 
     success.value = true;
   } catch (error) {
-    showError((error as Error).message);
+    showError({ description: (error as Error).message });
   } finally {
     isLoading.value = false;
   }
