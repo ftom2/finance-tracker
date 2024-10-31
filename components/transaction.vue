@@ -56,7 +56,7 @@ const color = computed(() => {
   return isIncome.value ? "green" : "red";
 });
 
-const emit = defineEmits(["deleted"]);
+const emit = defineEmits(["deleted", "edit"]);
 
 async function deleteTransaction() {
   try {
@@ -83,12 +83,16 @@ async function deleteTransaction() {
   }
 }
 
+function editTransaction() {
+  emit("edit", transaction);
+}
+
 const items = [
   [
     {
       label: "Edit",
       icon: "i-heroicons-pencil-square-20-solid",
-      click: () => console.log("Edit"),
+      click: editTransaction,
     },
     {
       label: "Delete",

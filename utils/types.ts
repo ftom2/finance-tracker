@@ -1,7 +1,7 @@
 import type { TransactionType } from "~/constants";
 
 export interface ITransaction {
-  id: number;
+  id?: number;
   amount: number;
   category: string;
   description: string;

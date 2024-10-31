@@ -32,9 +32,11 @@
       </p>
     </div>
     <div>
-      <NewTransactionModal
+      <TransactionModal
         v-model="isNewTransactionModalOpen"
+        :edited-transaction="editedTransaction"
         @saved="refresh"
+        @closed="onClose"
       />
       <UButton
         icon="i-heroicons-plus-circle"
@@ -60,6 +62,7 @@
         :key="transaction.id"
         :transaction="transaction"
         @deleted="refresh"
+        @edit="onEdit"
       />
     </div>
   </section>
@@ -77,6 +80,8 @@ const selectedView = ref<TimePeriod>(
 );
 const isNewTransactionModalOpen = ref(false);
 const { current, previous } = useSelectedTimePeriod(selectedView);
+
+// get this year's transactions
 const {
   isLoading,
   transactionsGroupedByDate,
@@ -88,6 +93,8 @@ const {
   investmentsTotal,
   refresh,
 } = useTransactions(current);
+
+// get previous year's transactions
 const {
   incomeTotal: prevIncomeTotal,
   expenseTotal: prevExpenseTotal,
@@ -95,6 +102,8 @@ const {
   investmentsTotal: prevInvestmentsTotal,
   refresh: refreshPrevious,
 } = useTransactions(previous);
+
+const editedTransaction = ref<ITransaction | null>(null);
 
 const trends = computed(() => {
   return [
@@ -124,6 +133,16 @@ const trends = computed(() => {
     },
   ];
 });
+
+function onEdit(transaction: ITransaction) {
+  editedTransaction.value = transaction;
+  isNewTransactionModalOpen.value = true;
+}
+
+function onClose() {
+  isNewTransactionModalOpen.value = false;
+  editedTransaction.value = null;
+}
 
 await Promise.all([refresh(), refreshPrevious()]);
 </script>

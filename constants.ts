@@ -27,3 +27,7 @@ export const TRANSACTION_TYPES: TransactionType[] = [
 
 export const DEFAULT_AVATAR =
   "https://avatars.githubusercontent.com/u/739984?v=4";
+
+export const TABLE_NAMES = {
+  transactions: "transactions",
+} as const;

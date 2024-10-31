@@ -13,6 +13,7 @@
         <UFormGroup label="Transaction type" name="type" :required="true">
           <USelect
             :options="TRANSACTION_TYPES"
+            :disabled="isEditing"
             placeholder="Select a Type"
             v-model="state.type"
           />
@@ -51,7 +52,7 @@
             color="black"
             variant="solid"
             type="submit"
-            label="Save"
+            :label="buttonLabel"
             :loading="isLoading"
           />
           <UButton
@@ -70,14 +71,23 @@
 </template>
 
 <script setup lang="ts">
-import { CATEGORIES, TRANSACTION_TYPES, TransactionType } from "~/constants";
+import {
+  CATEGORIES,
+  TABLE_NAMES,
+  TRANSACTION_TYPES,
+  TransactionType,
+} from "~/constants";
 import { transactionSchema } from "~/lib/schemas/transaction-schema";
+
+const emit = defineEmits(["close", "saved", "closed"]);
+const props = defineProps<{ editedTransaction: ITransaction | null }>();
 
 const { showSuccess, showError } = useToastMessages();
 const supabase = useSupabaseClient();
 const isLoading = ref(false);
 const isOpen = defineModel({ default: false });
 const form = ref<null | HTMLFormElement>(null);
+const isEditing = computed(() => !!props.editedTransaction);
 const initialState = {
   type: "",
   amount: 0,
@@ -85,10 +95,13 @@ const initialState = {
   description: "",
   category: "",
 };
-const emit = defineEmits(["close", "saved"]);
+// when editing, there is a watcher that will update the state with the edited transaction
+const state = ref({ ...initialState });
 const schema = transactionSchema;
 
-const state = ref({ ...initialState });
+const buttonLabel = computed(() => {
+  return isEditing.value ? "Update" : "Save";
+});
 
 const resetForm = () => {
   state.value = { ...initialState };
@@ -101,23 +114,27 @@ async function submit() {
   const data = { ...state.value };
   try {
     const { error } = await supabase
-      .from("transactions")
+      .from(TABLE_NAMES.transactions)
       // @ts-ignore
-      .insert([data]);
+      .upsert({ ...data });
 
     if (error) {
-      throw new Error();
+      throw error;
     }
-
     showSuccess({
-      description: "Transaction added successfully",
+      description: isEditing.value
+        ? "Transaction updated successfully"
+        : "Transaction added successfully",
     });
     emit("saved");
     isOpen.value = false;
   } catch (error) {
     console.error(error);
     showError({
-      description: "Failed to add transaction",
+      title: isEditing.value
+        ? "Failed to update transaction"
+        : "Failed to add transaction",
+      description: (error as Error).message,
     });
   } finally {
     isLoading.value = false;
@@ -127,6 +144,28 @@ async function submit() {
 watch(isOpen, (newIsOpen) => {
   if (!newIsOpen) {
     resetForm();
+    emit("closed");
   }
 });
+
+watch(
+  () => state.value.type,
+  (newType) => {
+    if (newType !== TransactionType.Expense) {
+      state.value.category = "";
+    }
+  }
+);
+
+watch(
+  () => props.editedTransaction,
+  (newTransaction) => {
+    if (newTransaction) {
+      state.value = {
+        ...newTransaction,
+        created_at: newTransaction.created_at.split("T")[0],
+      };
+    }
+  }
+);
 </script>
