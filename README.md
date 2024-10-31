@@ -1,75 +1,57 @@
-# Nuxt Minimal Starter
+# Finance Tracker
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+A modern web application for tracking personal finances, built with Nuxt 3, Supabase, and Nuxt UI.
 
-## Setup
+## Features
 
-Make sure to install dependencies:
+- 📊 Track income, expenses, savings, and investments
+- 📅 View transactions by day, month, or year
+- 📱 Responsive design that works on desktop and mobile
+- 🌙 Dark mode support
+- 🔒 Secure authentication with Supabase
+- 📈 Visual summaries and trends
+- 🏷️ Categorize expenses for better organization
 
+## Tech Stack
+
+- **Frontend**: Nuxt 3, Vue 3, TypeScript
+- **UI Components**: Nuxt UI
+- **Backend/Database**: Supabase
+- **Authentication**: Supabase Auth
+- **Styling**: Tailwind CSS
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies:
 ```bash
-# npm
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
+3. Create a `.env` file with your Supabase credentials:
+```env
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_anon_key
+```
 
-Start the development server on `http://localhost:3000`:
-
+4. Run the development server:
 ```bash
-# npm
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+5. Open [http://localhost:3000](http://localhost:3000)
 
-Build the application for production:
+## Development
 
-```bash
-# npm
-npm run build
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run seed` - Seed the database with sample data
 
-# pnpm
-pnpm build
+## Contributing
 
-# yarn
-yarn build
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-# bun
-bun run build
-```
+## License
 
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+[MIT License](LICENSE)
