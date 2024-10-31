@@ -1,37 +1,15 @@
 <script setup lang="ts">
-const supabase = useSupabaseClient();
-const user = useSupabaseUser();
+interface UserDropdownProps {
+  items: {
+    label: string;
+    slot?: string;
+    disabled?: boolean;
+    icon?: string;
+    click?: () => void;
+  }[][];
+}
 
-const items = computed(() => [
-  [
-    {
-      label: user.value?.email || "",
-      slot: "account",
-      disabled: true,
-    },
-  ],
-  [
-    {
-      label: "Settings",
-      icon: "i-heroicons-cog-8-tooth",
-      click: () => {
-        console.log("Settings");
-      },
-    },
-  ],
-
-  [
-    {
-      label: "Sign out",
-      icon: "i-heroicons-arrow-left-on-rectangle",
-
-      click: async () => {
-        await supabase.auth.signOut();
-        return navigateTo("/login");
-      },
-    },
-  ],
-]);
+defineProps<UserDropdownProps>();
 </script>
 
 <template>
