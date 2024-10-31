@@ -4,7 +4,7 @@ import "dotenv/config";
 import { CATEGORIES, TransactionType } from "~/constants";
 
 const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_KEY!;
+const supabaseKey = process.env.SUPABASE_SECRET!;
 
 enum TransactionTypeWithoutExpense {
   Income = "Income",
@@ -15,6 +15,11 @@ enum TransactionTypeWithoutExpense {
 const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: { persistSession: false },
 });
+
+const {
+  data: { users },
+  error,
+} = await supabase.auth.admin.listUsers();
 
 function generateTransaction() {
   // make sure that 85% of the time, the transaction type is an expense
@@ -49,6 +54,7 @@ function generateTransaction() {
     description: faker.lorem.sentence(),
     created_at: faker.date.recent({ days: 700 }).toISOString(),
     type,
+    user_id: users[0].id,
   };
 
   if (type === TransactionType.Expense) {
